@@ -4,7 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, EyeOff } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { authenticationApi } from '../../api-sdk/apiInstance';
+import { routePath } from '../../config/paths';
 
 
 interface RegisterFormData {
@@ -28,6 +30,8 @@ const RegisterPage: React.FC = () => {
     password: '',
     confirmPassword: ''
   });
+
+  const nevigate = useNavigate();
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -63,10 +67,17 @@ const RegisterPage: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: FormEvent): void => {
-    e.preventDefault();
-    if (validateForm()) {
-      console.log('Registration form submitted:', formData);
+  const handleSubmit = async (e: FormEvent): Promise<void> => {
+    try {
+      e.preventDefault();
+      if (validateForm()) {
+        console.log('Registration form submitted:', formData);
+      }
+      await authenticationApi.apiAuthRegisterPost(formData);
+      /** redirect to login */
+      nevigate(routePath.login)
+    } catch (error) {
+      console.error(error);
     }
   };
 

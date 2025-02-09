@@ -4,7 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, EyeOff } from 'lucide-react';
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
+import { authenticationApi } from '../../api-sdk/apiInstance';
+import { routePath } from '../../config/paths';
 
 // Type definitions for form data and errors
 interface LoginFormData {
@@ -24,6 +26,8 @@ const LoginPage: React.FC = () => {
         email: '',
         password: ''
     });
+
+    const navigate = useNavigate()
 
     const validateEmail = (email: string): boolean => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -51,11 +55,16 @@ const LoginPage: React.FC = () => {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = (e: FormEvent): void => {
+    const handleSubmit = async (e: FormEvent): Promise<void> => {
         e.preventDefault();
         if (validateForm()) {
             console.log('Login form submitted:', formData);
         }
+        const res = await authenticationApi.apiAuthLoginPost(formData);
+        localStorage.setItem('token', res.token || "");
+        localStorage.setItem('userId', res.userId || "");
+        /** redirect to app */
+        navigate(routePath.app)
     };
 
     return (
